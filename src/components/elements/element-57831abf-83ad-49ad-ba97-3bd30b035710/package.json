@@ -1,0 +1,1 @@
+{"name":"ww-rich-text-temp","repository":{"type":"git","url":"https://github.com/weweb-assets/ww-rich-text-temp"},"version":"3.1.0","scripts":{"build":"weweb build","serve":"weweb serve"},"dependencies":{"animejs":"^3.2.1","marked":"^14.1.2","medium-zoom":"^1.0.6","prismjs":"^1.23.0"},"devDependencies":{},"license":"MIT"}
