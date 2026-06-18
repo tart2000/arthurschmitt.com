@@ -52,7 +52,13 @@ export default class wwObjectHelper {
     /**
      * TODO: signature will complety change as soon as we are sure non external code use it anymore
      */
-    static async createFromTemplate(wwObjectTemplate, parentSectionId, keepChildren, parentLibraryComponentId) {
+    static async createFromTemplate(
+        wwObjectTemplate,
+        parentSectionId,
+        keepChildren,
+        parentLibraryComponentId,
+        keepUid = false
+    ) {
         const type = wwObjectTemplate.type;
 
         if (type && !wwObjectTemplate.wwObjectBaseId) {
@@ -75,6 +81,7 @@ export default class wwObjectHelper {
             wwObjectTemplate,
             noHistory: true,
             keepChildren,
+            keepUid,
         });
     }
 

@@ -1,28 +1,11 @@
 <template>
-    <component
-        :is="tag"
-        class="ww-button"
-        :class="{ button: tag, '-link': hasLink && !isEditing, active: isActive }"
-        :type="buttonType"
-        :style="buttonStyle"
-        :data-ww-flag="'btn-' + content.buttonType"
-        :disabled="content.disabled"
-        v-bind="properties"
-        @focus="isReallyFocused = true"
-        @blur="onBlur($event)"
-        @mousedown="onMouseActivate"
-        @mouseup="onMouseDeactivate"
-        @mouseleave="onMouseDeactivate"
-        @touchstart="onTouchActivate"
-        @touchend="onTouchDeactivate"
-        @touchcancel="onTouchDeactivate"
-        @keydown.enter="onKeyActivate"
-        @keydown.space="onKeyActivate"
-        @keyup.enter="onKeyDeactivate"
-        @keyup.space="onKeyDeactivate"
-        @keydown="onKeyDown"
-        @keyup="onKeyUp"
-    >
+    <component :is="tag" class="ww-button" :class="{ button: tag, '-link': hasLink && !isEditing, active: isActive }"
+        :type="buttonType" :style="buttonStyle" :data-ww-flag="'btn-' + content.buttonType" :disabled="content.disabled"
+        v-bind="properties" @focus="isReallyFocused = true" @blur="onBlur($event)" @mousedown="onMouseActivate"
+        @mouseup="onMouseDeactivate" @mouseleave="onMouseDeactivate" @touchstart="onTouchActivate"
+        @touchend="onTouchDeactivate" @touchcancel="onTouchDeactivate" @keydown.enter="onKeyActivate"
+        @keydown.space="onKeyActivate" @keyup.enter="onKeyDeactivate" @keyup.space="onKeyDeactivate"
+        @keydown="onKeyDown" @keyup="onKeyUp">
         <wwElement v-if="content.hasLeftIcon && content.leftIcon" v-bind="content.leftIcon"></wwElement>
         <wwText tag="span" :text="text"></wwText>
         <wwElement v-if="content.hasRightIcon && content.rightIcon" v-bind="content.rightIcon"></wwElement>
@@ -203,6 +186,7 @@ export default {
 .ww-button {
     justify-content: center;
     align-items: center;
+
     &.button {
         outline: none;
         border: none;
@@ -210,6 +194,7 @@ export default {
         font-family: inherit;
         font-size: inherit;
     }
+
     &.-link {
         cursor: pointer;
     }

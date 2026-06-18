@@ -2,7 +2,7 @@ export function getBackgroundStyle(style) {
     // FORMAT BACKGROUND IMAGE
     let backgroundImage;
     if (style.backgroundImage) {
-        if (style.backgroundImage.startsWith('url(')) {
+        if (style.backgroundImage.startsWith('url(') && !style.backgroundImage.startsWith("url('designs/")) {
             backgroundImage = style.backgroundImage;
         } else if (
             style.backgroundImage.startsWith('https://') ||
@@ -12,8 +12,12 @@ export function getBackgroundStyle(style) {
         ) {
             backgroundImage = wwLib.wwUtils.formatBgImgUrl(style.backgroundImage);
         } else {
+            let imgUrl = style.backgroundImage;
+            if (imgUrl.startsWith("url('designs/")) {
+                imgUrl = imgUrl.replace("url('", '').replace("')", '');
+            }
              /* wwFront:start */
-            backgroundImage = wwLib.wwUtils.formatBgImgUrl(style.backgroundImage);
+            backgroundImage = wwLib.wwUtils.formatBgImgUrl(imgUrl);
             /* wwFront:end */
         }
     }

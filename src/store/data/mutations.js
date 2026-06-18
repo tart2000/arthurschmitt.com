@@ -52,9 +52,15 @@ export default {
     /*=============================================m_ÔÔ_m=============================================\
         WORKFLOWS
     \================================================================================================*/
-    setWorkflowActionResult(state, { workflowId, actionId, result, error }) {
+    setWorkflowActionResult(state, { workflowId, actionId, result, error, config }) {
         set(state.workflowsResults, `${workflowId}.${actionId}.result`, result);
         set(state.workflowsResults, `${workflowId}.${actionId}.error`, error);
+        if (config !== undefined) {
+            set(state.workflowsResults, `${workflowId}.${actionId}.config`, config);
+        }
+    },
+    setWorkflowDebugMetadata(state, { workflowId, metadata }) {
+        set(state.workflowsResults, `${workflowId}.__metadata`, metadata || null);
     },
     setWorkflowError(state, { workflowId, value }) {
         set(state.workflowsResults, `${workflowId}.error`, value);
@@ -62,13 +68,35 @@ export default {
     setWorkflowActionLoop(state, { workflowId, actionId, loop }) {
         set(state.workflowsResults, `${workflowId}.${actionId}.loop`, loop);
     },
+    setWorkflowActionStream(state, { workflowId, actionId, stream }) {
+        set(state.workflowsResults, `${workflowId}.${actionId}.stream`, stream);
+    },
+    setWorkflowVariable(state, { workflowId, actionId, value, type, scopeId }) {
+        set(state.workflowsResults, `${workflowId}.variables.${actionId}`, { value, type, scopeId });
+    },
+    deleteWorkflowVariable(state, { workflowId, actionId }) {
+        if (state.workflowsResults[workflowId]?.variables) {
+            delete state.workflowsResults[workflowId].variables[actionId];
+        }
+    },
     initGlobalWorkflow(state, workflowData) {
         set(state.globalWorkflows, workflowData.id, workflowData);
     },
     setGlobalWorkflow(state, workflowData) {
+        const currentWorkflow = state.globalWorkflows[workflowData.id];
+        if (currentWorkflow?.version !== undefined && workflowData.version === undefined) {
+            set(state.globalWorkflows, workflowData.id, { ...workflowData, version: currentWorkflow.version });
+            return;
+        }
         set(state.globalWorkflows, workflowData.id, workflowData);
     },
     resetWorkflowsResult(state) {
         state.workflowsResults = {};
+    },
+    resetWorkflowResult(state, { workflowId }) {
+        if (state.workflowsResults[workflowId]) {
+            const variables = state.workflowsResults[workflowId].variables;
+            state.workflowsResults[workflowId] = variables ? { variables } : {};
+        }
     },
  };

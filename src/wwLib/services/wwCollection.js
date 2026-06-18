@@ -1,7 +1,7 @@
 import { filterData, sortData, getValue } from '@/_common/helpers/code/customCode.js';
 import { executeWorkflows } from '@/_common/helpers/data/workflows.js';
 import { useComponentBasesStore } from '@/pinia/componentBases.js';
-
+ 
 export default {
     getCollection(collectionId) {
         const collection = wwLib.$store.getters['data/getCollections'][collectionId];
@@ -80,16 +80,13 @@ export default {
         return dataFromPreview;
         /* wwFront:end */
     },
-    async fetchCollection(id, { limit, offset } = {}, workflowContext) {
+    async fetchCollection(id, { limit, offset, parameters = {} } = {}, workflowContext) {
+ 
         const currentNavigationId = wwLib.globalVariables._navigationId;
         try {
             const currentCollectionInfo = wwLib.$store.getters['data/getCollections'][id];
             if (!currentCollectionInfo) return;
-            wwLib.logStore.verbose(`Start fetching collection _wwCollection(${id})`, {
-                workflowContext,
-                type: workflowContext ? 'action' : 'collection',
-            });
-            wwLib.$store.dispatch('data/setCollectionFetching', {
+             wwLib.$store.dispatch('data/setCollectionFetching', {
                 id,
                 isFetching: true,
             });
@@ -98,10 +95,6 @@ export default {
             offset = offset || 0;
             const newCollectionInfo = await this._fetchCollection(id, { limit, offset });
             if (currentNavigationId !== wwLib.globalVariables._navigationId) {
-                wwLib.logStore.verbose(`Cancelling collection _wwCollection(${id}) fetch (navigation)`, {
-                    workflowContext,
-                    type: workflowContext ? 'action' : 'collection',
-                });
                 return;
             }
 
@@ -141,12 +134,7 @@ export default {
             }
 
             if (collection.error) {
-                wwLib.logStore.error(`Error happened while fetching collection _wwCollection(${id})`, {
-                    error: collection.error,
-                    workflowContext,
-                    type: workflowContext ? 'action' : 'collection',
-                });
-                executeWorkflows('on-collection-fetch-error', {
+                 executeWorkflows('on-collection-fetch-error', {
                     event: {
                         error: collection.error.message ? collection.error.message : collection.error,
                         collection: collection.config.data,
@@ -154,14 +142,9 @@ export default {
                         collectionName: collection.name,
                     },
                 });
-            } else {
-                wwLib.logStore.verbose(`Data fetched for collection _wwCollection(${id})`, {
-                    workflowContext,
-                    type: workflowContext ? 'action' : 'collection',
-                });
             }
             wwLib.$store.dispatch('data/setCollection', collection);
-            if (currentNavigationId === wwLib.globalVariables._navigationId) {
+             if (currentNavigationId === wwLib.globalVariables._navigationId) {
                 wwLib.$store.dispatch('data/setCollectionFetching', { id, isFetching: false });
             }
         } catch (err) {
@@ -192,8 +175,7 @@ export default {
         if (updateBy === 'id') {
             index = collectionData.findIndex(item => item[idKey] === idValue);
             if (index === -1) {
-                wwLib.logStore.error(`Item with id ${idValue} not found in collection ${collectionId}`);
-                throw new Error(`Item with id ${idValue} not found in collection ${collectionId}`);
+                 throw new Error(`Item with id ${idValue} not found in collection ${collectionId}`);
             }
         }
         if (updateType === 'insert') {
@@ -223,19 +205,12 @@ export default {
      */
     async setOffset(collectionId, offset) {
         const collection = wwLib.$store.getters['data/getCollections'][collectionId];
-        wwLib.logStore.verbose(`Updating pagination offset of collection ${collection.name} (${collectionId})`, {
-            type: 'collection',
-        });
         const queryConfig = wwLib.wwCollection.getCollectionQueryConfig(collectionId) || {};
         if (collection.mode !== 'dynamic' || queryConfig.hasNativePagination) {
             await this.fetchCollection(collectionId, { offset });
         } else {
             await wwLib.$store.dispatch('data/setCollection', { ...collection, offset });
         }
-        wwLib.logStore.verbose(
-            `Pagination offset of collection ${collection.name} (${collectionId}) updated to ${offset}`,
-            { type: 'collection' }
-        );
     },
     getPaginationOptions(collectionId) {
         return wwLib.$store.getters['data/getPaginationOptions'](collectionId);

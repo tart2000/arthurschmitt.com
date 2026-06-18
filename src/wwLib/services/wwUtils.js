@@ -304,4 +304,29 @@ export default {
         }
         return null;
     },
+    formatBytes(bytes) {
+        bytes = Number(bytes || 0);
+        if (bytes === 0) return '0';
+        const k = 1024;
+        const sizes = ['b', 'Kb', 'Mb', 'Gb', 'Tb'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + '' + sizes[i];
+    },
+    formatDuration(ms) {
+        ms = Number(ms || 0);
+        if (ms === 0) return '0';
+        if (ms < 1000) return ms.toFixed(0) + 'ms';
+        if (ms < 60000) return Math.floor(ms / 1000).toFixed(0) + 's';
+        if (ms < 3600000) return Math.floor(ms / 60000).toFixed(0) + 'm';
+        if (ms < 86400000) return Math.floor(ms / 3600000).toFixed(0) + 'h';
+        return Math.floor(ms / 86400000).toFixed(0) + 'd';
+    },
+    formatNumber(value) {
+        value = Number(value || 0);
+        return value.toLocaleString('en-US', {
+            maximumFractionDigits: 2,
+            // notation: 'compact',
+            compactDisplay: 'short',
+        });
+    },
 };

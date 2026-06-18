@@ -148,7 +148,12 @@ export default {
         provide('wwFrontState', wwFrontState);
 
         const hasLink = computed(() => {
-            return state.link && state.link.type !== 'none';
+            return (
+                state.link &&
+                typeof state.link === 'object' &&
+                Object.keys(state.link).length &&
+                state.link.type !== 'none'
+            );
         });
 
         const wwElementState = reactive({

@@ -343,7 +343,7 @@ export function useLibraryComponentWorkflow({ baseUid, componentIdentifier }, co
         });
     }
 
-    function executeLibraryComponentWorkflow(workflowId, parameters) {
+    function executeLibraryComponentWorkflow(workflowId, parameters, { parentExecutionId } = {}) {
         const workflow = wwLib.$store.getters['libraries/getComponents'][baseUid]?.inner?.workflows?.[workflowId];
         if (!workflow) {
             console.error(`Workflow with id ${workflowId} not found`);
@@ -355,6 +355,7 @@ export function useLibraryComponentWorkflow({ baseUid, componentIdentifier }, co
             executionContext: {
                 type: LOG_TYPE[componentIdentifier.type],
                 uid: componentIdentifier.uid,
+                parentExecutionId,
              },
         });
     }

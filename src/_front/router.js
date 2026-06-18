@@ -2,12 +2,62 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import wwPage from './views/wwPage.vue';
 
-import { initializeData, initializePlugins, onPageUnload } from '@/_common/helpers/data';
+import {
+    initializeData,
+    initializePlugins,
+    initializeIntegrationInstances,
+    onPageUnload,
+} from '@/_common/helpers/data';
+import { convertPathToRouterFormat } from '@/_common/helpers/urlParametersParsing';
+import { getRuntimeEnvironment } from '@/helpers/frontEnv.js';
+import { useBackAuthStore } from '@/pinia/backAuth.js';
 
+/**
+ * @typedef {import('vue-router').Router} Router
+ * @typedef {import('vue-router').RouteRecordRaw} RouteRecordRaw
+ * @typedef {import('vue-router').RouterOptions} RouterOptions
+ * @typedef {import('vue-router').RouterScrollBehavior} RouterScrollBehavior
+ */
+
+/**
+ * @typedef {Object} Lang
+ * @property {string} lang
+ * @property {boolean} [default]
+ * @property {boolean} [isDefaultPath]
+ */
+
+/**
+ * @typedef {Object} PageSecurity
+ * @property {'authenticated' | string} [accessRule]
+ * @property {string[]} [accessRoles]
+ * @property {'AND' | 'OR'} [accessRolesCondition]
+ */
+
+/**
+ * @typedef {Object} Page
+ * @property {string} id
+ * @property {Record<string, string> & { default: string }} paths
+ * @property {string[]} langs
+ * @property {PageSecurity} [security]
+ * @property {{ userGroup: string }[]} [pageUserGroups]
+ */
+
+/**
+ * @typedef {Object} DesignInfo
+ * @property {string} homePageId
+ * @property {Page[]} pages
+ * @property {Lang[]} langs
+ * @property {unknown} [auth]
+ * @property {{ href?: string }} [baseTag]
+ */
+
+/** @type {Router} */
 let router;
+/** @type {RouteRecordRaw[]} */
 const routes = [];
 
-function scrollBehavior(to) {
+/** @type {RouterScrollBehavior} */
+const scrollBehavior = to => {
     if (to.hash) {
         return {
             el: to.hash,
@@ -16,31 +66,35 @@ function scrollBehavior(to) {
     } else {
         return { top: 0 };
     }
-}
+};
 
  
 /* wwFront:start */
 import pluginsSettings from '../../plugins-settings.json';
 
-// eslint-disable-next-line no-undef
-window.wwg_designInfo = {"id":"595841db-6612-4249-af46-8bfd9169fa6e","homePageId":"d3d2d604-2670-4196-8012-44a4e2cf08dc","authPluginId":null,"baseTag":{},"defaultTheme":"light","langs":[{"lang":"en","default":true}],"background":{"backgroundColor":"#F2F0EF"},"workflows":[],"pages":[{"id":"d3d2d604-2670-4196-8012-44a4e2cf08dc","linkId":"d3d2d604-2670-4196-8012-44a4e2cf08dc","name":"Home","folder":null,"paths":{"en":"home","default":"home"},"langs":["en"],"cmsDataSetPath":null,"sections":[{"uid":"2b354c4c-0056-43f9-81bb-7ce572644284","sectionTitle":"Section","linkId":"af194449-846b-44c9-91d1-74c5890fc7ec"},{"uid":"b548d8ca-101f-4c68-acc5-bd6b3ba43236","sectionTitle":"Slider Projets","linkId":"0f1f1e4b-c575-4870-bfd2-a18ba6e4693a"},{"uid":"4cc26834-d314-46d2-a26e-a12bef76eefd","sectionTitle":"Section","linkId":"59423773-ef5b-4cd1-8988-4168e8169267"},{"uid":"81b76955-6d5f-4334-9597-bdc28163119d","sectionTitle":"Slider POC","linkId":"80042bea-f4f3-43f7-9bd9-15e4c107fca5"},{"uid":"5d995745-6007-4a36-a150-536e0ba0143e","sectionTitle":"Section","linkId":"51d84755-7692-4591-8529-ce8a0ede7640"}],"pageUserGroups":[],"title":{"en":"Arthur Schmitt","fr":"Vide | Commencer à partir de zéro"},"meta":{"desc":{"en":"Arthur est créateur d'outils et de jouets numériques. Il aime construire, expérimenter et transformer rapidement des idées complexes en solutions concrètes et fonctionnelles."},"keywords":{"en":"designer, design, engineer, indie builder"},"socialDesc":{},"socialTitle":{},"structuredData":{}},"metaImage":"images/my-notion-face-portrait_1_.png?_wwcv=27"},{"id":"24436e86-bb2c-49bb-821f-d92a1592e03e","linkId":"24436e86-bb2c-49bb-821f-d92a1592e03e","name":"project/","folder":null,"paths":{"en":"project/{{slug|modulo}}","default":"project/{{slug|modulo}}"},"langs":["en"],"cmsDataSetPath":null,"sections":[{"uid":"6203fd86-9996-4e35-a46e-2ffb0832eca0","sectionTitle":"Section","linkId":"e148865e-cc23-40ba-a1ab-33d72c1219c0"}],"pageUserGroups":[],"title":{"en":""},"meta":{"desc":{},"keywords":{},"socialDesc":{},"socialTitle":{},"structuredData":{}},"metaImage":""}],"plugins":[{"id":"2bd1c688-31c5-443e-ae25-59aa5b6431fb","name":"REST API","namespace":"restApi"}]};
-// eslint-disable-next-line no-undef
-window.wwg_cacheVersion = 27;
-// eslint-disable-next-line no-undef
+window.wwg_designInfo = {"id":"595841db-6612-4249-af46-8bfd9169fa6e","homePageId":"d3d2d604-2670-4196-8012-44a4e2cf08dc","authPluginId":null,"baseTag":{},"defaultTheme":"light","langs":[{"lang":"en","default":true}],"background":{"backgroundColor":"#F2F0EF"},"workflows":[],"back":{"isServerSetup":{"staging":false,"production":false}},"auth":null,"pages":[{"id":"d3d2d604-2670-4196-8012-44a4e2cf08dc","linkId":"d3d2d604-2670-4196-8012-44a4e2cf08dc","name":"Home","folder":null,"paths":{"en":"home","default":"home"},"langs":["en"],"cmsDataSetPath":null,"sections":[{"uid":"2b354c4c-0056-43f9-81bb-7ce572644284","sectionTitle":"Section","linkId":"af194449-846b-44c9-91d1-74c5890fc7ec"},{"uid":"b548d8ca-101f-4c68-acc5-bd6b3ba43236","sectionTitle":"Slider Projets","linkId":"0f1f1e4b-c575-4870-bfd2-a18ba6e4693a"},{"uid":"4cc26834-d314-46d2-a26e-a12bef76eefd","sectionTitle":"Section","linkId":"59423773-ef5b-4cd1-8988-4168e8169267"},{"uid":"81b76955-6d5f-4334-9597-bdc28163119d","sectionTitle":"Slider POC","linkId":"80042bea-f4f3-43f7-9bd9-15e4c107fca5"},{"uid":"5d995745-6007-4a36-a150-536e0ba0143e","sectionTitle":"Section","linkId":"51d84755-7692-4591-8529-ce8a0ede7640"}],"pageUserGroups":[],"title":{"en":"Arthur Schmitt","fr":"Vide | Commencer à partir de zéro"},"meta":{"desc":{"en":"Arthur est créateur d'outils et de jouets numériques. Il aime construire, expérimenter et transformer rapidement des idées complexes en solutions concrètes et fonctionnelles."},"keywords":{"en":"designer, design, engineer, indie builder"},"socialDesc":{},"socialTitle":{},"structuredData":{}},"metaImage":"images/my-notion-face-portrait_1_.png?_wwcv=29","security":{}},{"id":"24436e86-bb2c-49bb-821f-d92a1592e03e","linkId":"24436e86-bb2c-49bb-821f-d92a1592e03e","name":"project/","folder":null,"paths":{"en":"project/{{slug|modulo}}","default":"project/{{slug|modulo}}"},"langs":["en"],"cmsDataSetPath":null,"sections":[{"uid":"6203fd86-9996-4e35-a46e-2ffb0832eca0","sectionTitle":"Section","linkId":"e148865e-cc23-40ba-a1ab-33d72c1219c0"}],"pageUserGroups":[],"title":{"en":""},"meta":{"desc":{},"keywords":{},"socialDesc":{},"socialTitle":{},"structuredData":{}},"metaImage":"","security":{}}],"plugins":[{"id":"2bd1c688-31c5-443e-ae25-59aa5b6431fb","name":"REST API","namespace":"restApi"}]};
+window.wwg_cacheVersion = 29;
 window.wwg_pluginsSettings = pluginsSettings;
-// eslint-disable-next-line no-undef
 window.wwg_disableManifest = false;
 
-const defaultLang = window.wwg_designInfo.langs.find(({ default: isDefault }) => isDefault) || {};
+/** @type {Lang} */
+const defaultLang = window.wwg_designInfo.langs.find(({ default: isDefault }) => isDefault) || {
+    lang: 'en',
+    default: true,
+};
 
+/**
+ * @param {Page} page
+ * @param {Lang} lang
+ * @param {string} [forcedPath]
+ */
 const registerRoute = (page, lang, forcedPath) => {
     const langSlug = !lang.default || lang.isDefaultPath ? `/${lang.lang}` : '';
     let path =
         forcedPath ||
         (page.id === window.wwg_designInfo.homePageId ? '/' : `/${page.paths[lang.lang] || page.paths.default}`);
 
-    //Replace params
-    path = path.replace(/{{([\w]+)\|([^/]+)?}}/g, ':$1');
+    path = convertPathToRouterFormat(path);
 
     routes.push({
         path: langSlug + path,
@@ -57,37 +111,68 @@ const registerRoute = (page, lang, forcedPath) => {
             wwLib.wwLang.defaultLang = defaultLang.lang;
             wwLib.$store.dispatch('front/setLang', lang.lang);
 
+            const backAuthStore = useBackAuthStore(wwLib.$pinia);
+            if (!wwLib.wwAuth.plugin) {
+                if (!backAuthStore.projectAuth && window.wwg_designInfo.auth) {
+                    backAuthStore.setProjectAuth(window.wwg_designInfo.auth);
+                }
+            }
+
             //Init plugins
             await initializePlugins();
 
-            //Check if private page
-            if (page.pageUserGroups?.length) {
-                // cancel navigation if no plugin
-                if (!wwLib.wwAuth.plugin) {
-                    return false;
+            //Init integration instances
+            await initializeIntegrationInstances();
+
+            if (!wwLib.wwAuth.plugin) {
+                await backAuthStore.refresh();
+                const projectAuth = backAuthStore.projectAuth || {};
+
+                //Check if private page
+                if (page.security?.accessRule === 'authenticated') {
+                    if (!backAuthStore.isAuthenticated) {
+                        window.location.href = `${wwLib.wwPageHelper.getPagePath(
+                            projectAuth.unauthenticatedPageId
+                        )}?_source=${to.path}`;
+                        return null;
+                    } else if (page.security?.accessRoles?.length) {
+                        const hasAccess =
+                            page.security.accessRolesCondition === 'AND'
+                                ? backAuthStore.matchAllRoles(page.security.accessRoles)
+                                : backAuthStore.matchAnyRoles(page.security.accessRoles);
+                        if (!hasAccess) {
+                            window.location.href = `${wwLib.wwPageHelper.getPagePath(
+                                projectAuth.unauthorizedPageId
+                            )}?_source=${to.path}`;
+                            return null;
+                        }
+                    }
                 }
+            } else {
+                // Deprecated legacy auth plugins, to remove in the future
+                if (page.pageUserGroups?.length) {
+                    await wwLib.wwAuth.init();
 
-                await wwLib.wwAuth.init();
+                    // Redirect to not sign in page if not logged
+                    if (!wwLib.wwAuth.getIsAuthenticated()) {
+                        window.location.href = `${wwLib.wwPageHelper.getPagePath(
+                            wwLib.wwAuth.getUnauthenticatedPageId()
+                        )}?_source=${to.path}`;
 
-                // Redirect to not sign in page if not logged
-                if (!wwLib.wwAuth.getIsAuthenticated()) {
-                    window.location.href = `${wwLib.wwPageHelper.getPagePath(
-                        wwLib.wwAuth.getUnauthenticatedPageId()
-                    )}?_source=${to.path}`;
+                        return null;
+                    }
 
-                    return null;
-                }
+                    //Check roles are required
+                    if (
+                        page.pageUserGroups.length > 1 &&
+                        !wwLib.wwAuth.matchUserGroups(page.pageUserGroups.map(({ userGroup }) => userGroup))
+                    ) {
+                        window.location.href = `${wwLib.wwPageHelper.getPagePath(
+                            wwLib.wwAuth.getUnauthorizedPageId()
+                        )}?_source=${to.path}`;
 
-                //Check roles are required
-                if (
-                    page.pageUserGroups.length > 1 &&
-                    !wwLib.wwAuth.matchUserGroups(page.pageUserGroups.map(({ userGroup }) => userGroup))
-                ) {
-                    window.location.href = `${wwLib.wwPageHelper.getPagePath(
-                        wwLib.wwAuth.getUnauthorizedPageId()
-                    )}?_source=${to.path}`;
-
-                    return null;
+                        return null;
+                    }
                 }
             }
 
@@ -144,19 +229,17 @@ if (page404) {
 } else {
     routes.push({
         path: '/:pathMatch(.*)*',
+        redirect: null,
         async beforeEnter() {
             window.location.href = '/404';
         },
     });
 }
 
-let routerOptions = {};
+/** @type {RouterOptions} */
+let routerOptions;
 
-const isProd =
-    !window.location.host.includes(
-        // TODO: add staging2 ?
-        '-staging.' + (process.env.WW_ENV === 'staging' ? import.meta.env.VITE_APP_PREVIEW_URL : '')
-    ) && !window.location.host.includes(import.meta.env.VITE_APP_PREVIEW_URL);
+const isProd = getRuntimeEnvironment() === 'production';
 
 if (isProd && window.wwg_designInfo.baseTag?.href) {
     let baseTag = window.wwg_designInfo.baseTag.href;
@@ -168,7 +251,6 @@ if (isProd && window.wwg_designInfo.baseTag?.href) {
     }
 
     routerOptions = {
-        base: baseTag,
         history: createWebHistory(baseTag),
         routes,
     };

@@ -91,7 +91,7 @@ export default {
                 ? wwProps.value.wwLink
                 : componentState.link;
 
-            if (!rawLink || rawLink.type === 'none') {
+            if (!rawLink || typeof rawLink !== 'object' || !Object.keys(rawLink).length || rawLink.type === 'none') {
                 return { type: 'none' };
             }
 

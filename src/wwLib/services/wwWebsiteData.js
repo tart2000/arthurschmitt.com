@@ -9,12 +9,8 @@ export default {
 
     async fetchPage(pageId) {
  
-        wwLib.logStore.verbose(`Loading page: _wwPage(${pageId})...`);
-
  
         await fetchData(pageId);
-
-        wwLib.logStore.verbose('Page loaded');
     },
 
     getPageRoute(pageIdOrLinkId, allowHomePageId) {

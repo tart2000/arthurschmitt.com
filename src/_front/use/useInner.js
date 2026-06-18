@@ -4,7 +4,7 @@ import { checkVariableType } from '@/_common/helpers/updateVariable.js';
 import { getValue } from '@/_common/helpers/code/customCode.js';
 import { useVariablesStore } from '@/pinia/variables.js';
 import { escapeHTMLInObject } from '@/_common/helpers/htmlEscaper.js';
-
+ 
 export function useInner(baseUid, { context, props }, componentIdentifier) {
     const sectionId = inject('sectionId', null);
     const variablesStore = useVariablesStore();
@@ -115,11 +115,7 @@ export function useInner(baseUid, { context, props }, componentIdentifier) {
             const variable = variableConfiguration.value[variableId] || componentVariablesConfiguration[variableId];
             try {
                 if (!variable) {
-                    wwLib.logStore.error(`Try to set variable ${variableId} (not found)`, {
-                        type: workflowContext ? 'action' : null,
-                        workflowContext,
-                    });
-                    throw new Error('variable not found');
+                     throw new Error('variable not found');
                 }
 
                 if (value === undefined && !['delete', 'shift', 'pop'].includes(arrayUpdateType)) {
@@ -136,11 +132,6 @@ export function useInner(baseUid, { context, props }, componentIdentifier) {
                 if (variable.type === 'object' && path) {
                     variables[variableId] = variables[variableId] || {};
                     set(variables[variableId], path, value);
-                    wwLib.logStore.verbose(`Variable _wwLocalVariable(${variableId}) update`, {
-                        preview: value,
-                        workflowContext,
-                        type: workflowContext ? 'action' : null,
-                    });
                 } else if (variable.type === 'array' && arrayUpdateType) {
                     variables[variableId] = variables[variableId] || [];
                     index = index || 0;
@@ -151,87 +142,29 @@ export function useInner(baseUid, { context, props }, componentIdentifier) {
                                 finalPath = `${finalPath}.${path}`;
                             }
                             set(variables[variableId], finalPath, value);
-                            wwLib.logStore.verbose(
-                                `Updating partially array variable _wwLocalVariable(${variableId}) `,
-                                {
-                                    preview: value,
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         }
                         case 'delete':
                             variables[variableId].splice(index, 1);
-                            wwLib.logStore.verbose(
-                                `Deleting item ${index} from array _wwLocalVariable(${variableId})`,
-                                {
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         case 'insert':
                             variables[variableId].splice(index, 0, value);
-                            wwLib.logStore.verbose(
-                                `Inserting value into array variable at index ${index} _wwLocalVariable(${variableId}) `,
-                                {
-                                    preview: value,
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         case 'unshift':
                             variables[variableId].unshift(value);
-                            wwLib.logStore.verbose(
-                                `Removing first element from array variable _wwLocalVariable(${variableId}) `,
-                                {
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         case 'push':
                             variables[variableId].push(value);
-                            wwLib.logStore.verbose(
-                                `Adding value at the end of the array variable _wwLocalVariable(${variableId}) `,
-                                {
-                                    preview: value,
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         case 'shift':
                             variables[variableId].shift(value);
-                            wwLib.logStore.verbose(
-                                `Adding value at the start of the array variable _wwLocalVariable(${variableId}) `,
-                                {
-                                    preview: value,
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                         case 'pop':
                             variables[variableId].pop(value);
-                            wwLib.logStore.verbose(
-                                `Removing last value of the array variable _wwLocalVariable(${variableId})`,
-                                {
-                                    workflowContext,
-                                    type: workflowContext ? 'action' : null,
-                                }
-                            );
                             break;
                     }
                 } else {
                     variables[variableId] = value;
-                    wwLib.logStore.verbose(`Setting value for _wwLocalVariable(${variableId}) `, {
-                        preview: escapeHTMLInObject(_.cloneDeep(value)),
-                        workflowContext,
-                        type: workflowContext ? 'action' : null,
-                    });
                 }
 
                 if (variable.isExternal && externalVariablesIds[variableId]) {
@@ -254,14 +187,7 @@ export function useInner(baseUid, { context, props }, componentIdentifier) {
 
                 return value;
             } catch (error) {
-                wwLib.logStore.error(
-                    `Unable to update variable ${
-                        variable ? `${variable.name} of type ${variable.type}` : ''
-                    } (${variableId}) : ${error.message} - got : `,
-                    { workflowContext }
-                );
-                wwLib.logStore.error(value);
-            }
+             }
         },
         componentVariablesConfiguration,
     };

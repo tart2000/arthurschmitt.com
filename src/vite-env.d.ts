@@ -18,6 +18,8 @@ interface ImportMetaEnv {
   readonly VITE_APP_SEGMENT_KEY: string
   readonly VITE_APP_STRIPE_PUBLIC_KEY: string
   readonly VITE_APP_USERFLOW_KEY: string
+  readonly VITE_APP_POSTHOG_KEY: string
+  readonly VITE_APP_POSTHOG_API_HOST: string
 }
 
 interface ImportMeta {

@@ -8,6 +8,10 @@ import plugin_2bd1c688_31c5_443e_ae25_59aa5b6431fb from '@/components/plugins/pl
 /* wwFront:end */
 
 import { computed, reactive } from 'vue';
+import { useBackTableViewsStore } from '@/pinia/backTableViews.js';
+import { useBackAuthStore } from '@/pinia/backAuth.js';
+import { getRuntimeEnvironment } from '@/helpers/frontEnv.js';
+import { useEnvVariablesStore } from '@/pinia/envVariables.js';
 
 export default {
     ...services,
@@ -40,7 +44,6 @@ export default {
         this.wwLog.init();
 
  
-        wwLib.logStore.verbose('Starting the application...');
         await this.wwWebsiteData.init();
         this.wwLang.init(router);
 
@@ -52,6 +55,7 @@ export default {
  
         services.scrollStore.start();
         services.keyboardEventStore.start();
+        services.pwaStore.start();
     },
      // TODO: Verify with Alexis, still uses wwImageMultiLang
     getResponsiveStyleProp({ store, style, uid, states = [], prop }) {
@@ -89,6 +93,27 @@ export default {
         return value;
     },
     globalContext: reactive({
+        auth: computed(() => {
+            const backAuthStore = useBackAuthStore(wwLib.$pinia);
+            return {
+                user: backAuthStore.user,
+                session: backAuthStore.session,
+                isAuthenticated: backAuthStore.isAuthenticated,
+            };
+        }),
+        env: computed(() => {
+            const envVariablesStore = useEnvVariablesStore(wwLib.$pinia);
+            let env = wwLib.getEnvironment();
+            if (env === 'preview') env = 'production';
+            return Object.values(envVariablesStore.values).reduce((acc, envVariable) => {
+                acc[envVariable.name] = envVariable[`${env}Value`];
+                return acc;
+            }, {});
+        }),
+        tableViews: computed(() => {
+            const backTableViewsStore = useBackTableViewsStore(wwLib.$pinia);
+            return backTableViewsStore?.data;
+        }),
         page: computed(() => {
             const page = wwLib.$store.getters['websiteData/getPage'];
             if (!page) return {};
@@ -144,6 +169,7 @@ export default {
                 theme: wwLib.$store.getters['front/getTheme'],
             };
         }),
+        pwa: services.pwaStore.pwa,
         screen: services.scrollStore.screen,
         componentPositionInfo: services.scrollStore.componentPositionInfo,
     }),
@@ -159,16 +185,7 @@ export default {
     }),
 
     getEnvironment() {
-        return wwLib.manager
-            ? 'editor'
-            : window.location.host.includes(
-                  // TODO: add staging2 ?
-                  '-staging.' + (process.env.WW_ENV === 'staging' ? import.meta.env.VITE_APP_PREVIEW_URL : '')
-              )
-            ? 'staging'
-            : window.location.host.includes(import.meta.env.VITE_APP_PREVIEW_URL)
-            ? 'preview'
-            : 'production';
+        return getRuntimeEnvironment();
     },
 
     useBaseTag() {

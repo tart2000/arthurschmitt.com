@@ -10,6 +10,7 @@ export default {
         if (this.isInitialized.value) return;
         if (this.plugin?._initAuth) {
             try {
+                await wwLib.wwPluginHelper.waitPluginsLoaded();
                 await this.plugin._initAuth();
             } catch (error) {
                 wwLib.wwLog.error('Error while initializing auth', error);

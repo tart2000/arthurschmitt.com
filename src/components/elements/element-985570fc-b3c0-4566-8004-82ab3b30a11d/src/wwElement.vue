@@ -28,8 +28,8 @@
         content.enableCalendarOnly && content.rangeMode === 'free'
           ? true
           : content.rangeMode === 'free'
-          ? content.enablePartialRange
-          : null
+            ? content.enablePartialRange
+            : null
       "
       :min-range="content.rangeMode === 'minmax' ? content.minRange : null"
       :max-range="content.rangeMode === 'minmax' ? content.maxRange : null"
@@ -106,7 +106,7 @@
 import DatePicker from "./vue-datepicker.js";
 import * as DateFnsLocal from "date-fns/locale";
 import "./main.css";
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 
 export default {
   components: {
@@ -118,18 +118,18 @@ export default {
     uid: { type: String, required: true },
     wwElementState: { type: Object, required: true },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const initValue = computed(() =>
       props.content.selectionMode === "single"
         ? props.content.initValueSingle || null
         : props.content.selectionMode === "range"
-        ? {
-            start: props.content.initValueRangeStart || null,
-            end: props.content.initValueRangeEnd || null,
-          }
-        : Array.isArray(props.content.initValueMulti)
-        ? props.content.initValueMulti
-        : []
+          ? {
+              start: props.content.initValueRangeStart || null,
+              end: props.content.initValueRangeEnd || null,
+            }
+          : Array.isArray(props.content.initValueMulti)
+            ? props.content.initValueMulti
+            : [],
     );
     const { value: variableValue, setValue } =
       wwLib.wwVariable.useComponentVariable({
@@ -144,6 +144,30 @@ export default {
     const selectDate = () => {
       wwDatePicker.value.selectDate();
     };
+
+    const useForm = inject("_wwForm:useForm", () => {});
+
+    const fieldName = computed(() => props.content.fieldName);
+    const validation = computed(() => props.content.validation);
+    const customValidation = computed(() => props.content.customValidation);
+    const required = computed(() => props.content.required);
+
+    useForm(
+      variableValue,
+      {
+        fieldName,
+        validation,
+        customValidation,
+        required,
+        initialValue: computed(() => props.content.value),
+      },
+      {
+        elementState: props.wwElementState,
+        emit,
+        sidepanelFormPath: "form",
+        setValue,
+      },
+    );
 
     return {
       variableValue,
@@ -229,9 +253,9 @@ export default {
       return null;
     },
     isReadOnly() {
-      return this.wwElementState.props.readonly === undefined
+      return this.wwElementState.props?.readonly === undefined
         ? this.content.readonly
-        : this.wwElementState.props.readonly;
+        : this.wwElementState.props?.readonly;
     },
     customDayNames() {
       if (this.locale == "ar") {
@@ -310,7 +334,7 @@ export default {
       else if (this.content.selectionMode === "range") {
         if (!value.start && !value.end) return null;
         return [value.start || null, value.end || null].filter(
-          (value) => value !== null && value !== ""
+          (value) => value !== null && value !== "",
         );
       } else if (this.content.selectionMode === "multi") return value;
     },
@@ -326,11 +350,11 @@ export default {
         this.content.selectionMode === "single"
           ? null
           : this.content.selectionMode === "range"
-          ? {
-              start: null,
-              end: null,
-            }
-          : [];
+            ? {
+                start: null,
+                end: null,
+              }
+            : [];
       this.setValue(clearValue);
     },
     handleFlowStep(value) {

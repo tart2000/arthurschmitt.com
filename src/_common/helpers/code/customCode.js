@@ -1,5 +1,6 @@
-import { isObject } from 'lodash';
+import { get, isObject } from 'lodash';
 import { computed } from 'vue';
+import { isFile, isFileList } from '@/_common/helpers/code/filePayload.js';
 import { _wwFormulas } from '@/_common/helpers/code/wwFormulas';
 import { workflowFunctions } from '@/_common/helpers/code/workflows';
 
@@ -8,6 +9,16 @@ const AsyncFunction = async function () {}.constructor;
 const ERROR_CODES = {
     UNEXPECTED_END_OF_FORMULA: "Unexpected token ';'",
 };
+
+class FormulaError extends Error {
+    constructor(message, options = {}) {
+        super(message);
+        this.name = 'FormulaError';
+        this.originalError = options.originalError;
+        this.formulaCode = options.formulaCode;
+        this.formulaType = options.formulaType;
+    }
+}
 
 export const _collections = computed(() => {
     const collections = wwLib.$store.getters['data/getCollections'];
@@ -49,7 +60,7 @@ export const _pluginFormulas = computed(() => {
 });
 
 // eslint-disable-next-line no-unused-vars
-export function evaluateCode({ code, filter, sort, __wwmap }, context, event, args) {
+export function evaluateCode({ code, filter, sort, __wwmap, throwError = false }, context, event, args) {
  
     try {
         const rawValue = new Function(
@@ -78,9 +89,15 @@ export function evaluateCode({ code, filter, sort, __wwmap }, context, event, ar
             event,
             ...(args?.value || [])
         );
-        return mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args);
+        return mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args, throwError);
     } catch (error) {
-        return { error };
+        const formulaError = new FormulaError(`Formula evaluation error: ${error.message}`, {
+            originalError: error,
+            formulaCode: code,
+            formulaType: 'js',
+        });
+        if (throwError) throw formulaError;
+        return { error: formulaError };
     }
 }
 
@@ -118,13 +135,16 @@ export async function executeCode(code, context, event, wwUtils) {
         );
     } catch (error) {
         wwLib.wwLog.error(error);
-        delete error.stack;
-        throw error;
+        throw new FormulaError(`Formula evaluation error: ${error.message}`, {
+            originalError: error,
+            formulaCode: code,
+            formulaType: 'js',
+        });
     }
 }
 
 // eslint-disable-next-line no-unused-vars
-export function evaluateFormula({ code, filter, sort, __wwmap }, context, event, args) {
+export function evaluateFormula({ code, filter, sort, __wwmap, throwError = false }, context, event, args) {
  
     try {
         const rawValue = new Function(
@@ -153,21 +173,23 @@ export function evaluateFormula({ code, filter, sort, __wwmap }, context, event,
             event,
             ...(args?.value || [])
         );
-        return mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args);
+        return mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args, throwError);
     } catch (error) {
-        if (error.message) {
-            let errorMessage = error.message;
-            switch (error.message) {
-                case ERROR_CODES.UNEXPECTED_END_OF_FORMULA:
-                    errorMessage = 'Unexpected end of formula';
-            }
-            return { error: errorMessage };
-        } else return { error };
+        const message =
+            error.message === ERROR_CODES.UNEXPECTED_END_OF_FORMULA ? 'Unexpected end of formula' : error.message;
+        const formulaError = new FormulaError(`Formula evaluation error: ${message}`, {
+            originalError: error,
+            formulaCode: code,
+            formulaType: 'f',
+        });
+        if (throwError) throw formulaError;
+        return { error: formulaError };
     }
 }
 
 export function evaluateGlobalFormula(__wwformula, __wwcontext, parameters) {
     const __wwnames = parameters.map(parameter => parameter.label).join(', ');
+    const throwError = !!__wwformula?.throwError;
 
     try {
         const args = parameters.map(parameter => parameter.value);
@@ -185,53 +207,59 @@ export function evaluateGlobalFormula(__wwformula, __wwcontext, parameters) {
                     );`
         )(__wwformula, __wwcontext, evaluateFormula, evaluateCode, args);
     } catch (error) {
-        if (error.message) {
-            let errorMessage = error.message;
-            switch (error.message) {
-                case ERROR_CODES.UNEXPECTED_END_OF_FORMULA:
-                    errorMessage = 'Unexpected end of formula';
-            }
-            return { error: errorMessage };
-        } else return { error };
+        if (error instanceof FormulaError) {
+            if (throwError) throw error;
+            return { error };
+        }
+        const message =
+            error.message === ERROR_CODES.UNEXPECTED_END_OF_FORMULA ? 'Unexpected end of formula' : error.message;
+        const formulaError = new FormulaError(`Formula evaluation error: ${message}`, {
+            originalError: error,
+            formulaCode: __wwformula.code,
+            formulaType: __wwformula.type,
+        });
+        if (throwError) throw formulaError;
+        return { error: formulaError };
     }
 }
 
-function mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args) {
+function mapFilterSortData(rawValue, filter, sort, __wwmap, context, event, args, throwError = false) {
     let value = rawValue;
     if (Array.isArray(value)) {
         let data = value; // TODO: remove this when no side effects are expected
-        if (filter) data = filterData(data, filter, context, event, args);
-        if (sort) data = sortData([...data], sort, context, event, args);
-        if (__wwmap) data = mapData(data, __wwmap, context, event, args);
+        if (filter) data = filterData(data, filter, context, event, args, throwError);
+        if (sort) data = sortData([...data], sort, context, event, args, throwError);
+        if (__wwmap) data = mapData(data, __wwmap, context, event, args, throwError);
         return { value: data, rawValue };
     } else if (isObject(value) && Array.isArray(value.data) && value.type === 'collection') {
         let data = value.data; // TODO: remove this when no side effects are expected
-        if (filter) data = filterData(data, filter, context, event, args);
-        if (sort) data = sortData([...data], sort, context, event, args);
-        if (__wwmap) data = mapData(data, __wwmap, context, event, args);
+        if (filter) data = filterData(data, filter, context, event, args, throwError);
+        if (sort) data = sortData([...data], sort, context, event, args, throwError);
+        if (__wwmap) data = mapData(data, __wwmap, context, event, args, throwError);
         return { value: { ...value, data, total: data.length }, rawValue };
     }
     return { value, rawValue };
 }
 
-export function getJsValue({ code, filter, sort, __wwmap }, context, event, args) {
-    const { value } = evaluateCode({ code, filter, sort, __wwmap }, context, event, args);
+export function getJsValue({ code, filter, sort, __wwmap, throwError = false }, context, event, args) {
+    const { value } = evaluateCode({ code, filter, sort, __wwmap, throwError }, context, event, args);
     return value;
 }
-export function getFormulaValue({ code, filter, sort, __wwmap }, context, event, args) {
-    const { value } = evaluateFormula({ code, filter, sort, __wwmap }, context, event, args);
+export function getFormulaValue({ code, filter, sort, __wwmap, throwError = false }, context, event, args) {
+    const { value } = evaluateFormula({ code, filter, sort, __wwmap, throwError }, context, event, args);
     return value;
 }
 
-export function sortData(data, sort, context, event, args) {
+export function sortData(data, sort, context, event, args, throwError = false) {
     if (!Array.isArray(data)) return data;
-    const computedSort = getValue(sort, context, { event, args });
+    const computedSort = getValue(sort, context, { event, args, throwError });
     data.sort((a, b) => {
         for (const elem of computedSort) {
             let result = 0;
 
-            const _a = a?.[elem.key];
-            const _b = b?.[elem.key];
+            const path = elem?.field ?? elem?.key;
+            const _a = path ? get(a, path) : undefined;
+            const _b = path ? get(b, path) : undefined;
 
             let type = _a === null || _a === undefined ? (_b === null ? 'undefined' : typeof _b) : typeof _a;
             switch (type) {
@@ -406,52 +434,74 @@ function stringToRegex(str) {
     return new RegExp(main, options);
 }
 
-export function filterData(data, filter, context, event, args) {
+export function filterData(data, filter, context, event, args, throwError = false) {
     if (!Array.isArray(data)) return data;
-    const computedFilter = getValue(filter, context, { event, args });
+    const computedFilter = getValue(filter, context, { event, args, throwError });
     return data.filter(elem => {
         const result = filterDataElem(elem, computedFilter);
         return result === null || result;
     });
 }
 
-function mapData(data, __wwmap, context, event, args) {
+function mapData(data, __wwmap, context, event, args, throwError = false) {
     if (!Array.isArray(data)) return data;
     return data.map((elem, index) => {
         const mappedElem = {};
         Object.keys(__wwmap).forEach(key => {
-            mappedElem[key] = getValue(__wwmap[key], { ...context, mapping: { value: elem, index } }, { event, args });
+            mappedElem[key] = getValue(
+                __wwmap[key],
+                { ...context, mapping: { value: elem, index } },
+                { event, args, throwError }
+            );
         });
         return mappedElem;
     });
 }
 
-export function getValue(rawValue, context, { event, recursive = true, defaultUndefined, args } = {}) {
+export function getValue(
+    rawValue,
+    context,
+    { event, recursive = true, defaultUndefined, args, throwError = false } = {}
+) {
     if (rawValue === undefined) return _.cloneDeep(defaultUndefined);
     if (!rawValue) return rawValue;
 
     if (rawValue.__wwtype === 'd') {
-        return rawValue.data.map(raw => getValue(raw, context, { event, args }));
+        return rawValue.data.map(raw => getValue(raw, context, { event, args, throwError }));
     } else if (rawValue.__wwtype === 'f') {
         return getFormulaValue(
-            { code: rawValue.code, filter: rawValue.filter, sort: rawValue.sort, __wwmap: rawValue.__wwmap },
+            {
+                code: rawValue.code,
+                filter: rawValue.filter,
+                sort: rawValue.sort,
+                __wwmap: rawValue.__wwmap,
+                throwError,
+            },
             context || {},
             event,
             args
         );
     } else if (rawValue.__wwtype === 'js') {
         return getJsValue(
-            { code: rawValue.code, filter: rawValue.filter, sort: rawValue.sort, __wwmap: rawValue.__wwmap },
+            {
+                code: rawValue.code,
+                filter: rawValue.filter,
+                sort: rawValue.sort,
+                __wwmap: rawValue.__wwmap,
+                throwError,
+            },
             context || {},
             event,
             args
         );
     } else if (Array.isArray(rawValue) && recursive) {
-        return rawValue.map(raw => getValue(raw, context, { event, args }));
+        return rawValue.map(raw => getValue(raw, context, { event, args, throwError }));
+    } else if (isFile(rawValue) || isFileList(rawValue)) {
+        return rawValue;
     } else if (typeof rawValue === 'object' && recursive) {
         const value = {};
         Object.keys(rawValue).forEach(key => {
-            value[key] = getValue(rawValue[key], context, { event, args });
+            value[key] = getValue(rawValue[key], context, { event, args, throwError });
         });
         return value;
     } else {

@@ -1,4 +1,5 @@
 import { useComponentBasesStore } from '@/pinia/componentBases';
+import { extractPathParameters } from '@/_common/helpers/urlParametersParsing';
 
 export default {
     getCollections(state) {
@@ -35,8 +36,7 @@ export default {
     getPageParameterVariablesFromId: (_state, _getters, _rootState, rootGetters) => id => {
         const page = rootGetters['websiteData/getPageById'](id) || rootGetters['websiteData/getPageByLinkId'](id);
         if (!page || !page.paths) return [];
-        const match = [...page.paths.default.matchAll(/{{([\w]+)\|([^/]+)?}}/g)];
-        return match.map(([, name, defaultValue]) => ({
+        return extractPathParameters(page.paths.default).map(({ name, defaultValue }) => ({
             type: 'query',
             id: name,
             name,
@@ -78,7 +78,27 @@ export default {
             }, {});
     },
      getWorkflowResults: state => workflowId => state.workflowsResults[workflowId],
-    getGlobalWorkflows(state) {
+    getAllWorkflows(state) {
         return state.globalWorkflows;
+    },
+    getGlobalWorkflows(state) {
+        return Object.entries(state.globalWorkflows).reduce((acc, [id, workflow]) => {
+            if (workflow.type !== 'back') acc[id] = workflow;
+            return acc;
+        }, {});
+    },
+    getBackendWorkflows(state) {
+        return Object.entries(state.globalWorkflows).reduce((acc, [id, workflow]) => {
+            if (workflow.type === 'back') acc[id] = workflow;
+            return acc;
+        }, {});
+    },
+    getBackendWorkflowsFolders: (state, getters) => trigger => {
+        const backendWorkflows = Object.values(getters.getBackendWorkflows);
+        const workflows =
+            !trigger || ['ww-api', 'ww-middleware'].includes(trigger)
+                ? backendWorkflows.filter(w => w.trigger == trigger)
+                : backendWorkflows.filter(w => !!w.trigger && !['ww-api', 'ww-middleware'].includes(w.trigger));
+        return workflows.filter(({ folder }) => folder).map(({ folder }) => ({ label: folder, value: folder }));
     },
 };

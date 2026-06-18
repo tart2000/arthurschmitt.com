@@ -1,5 +1,7 @@
 <template>
+     <!-- wwFront:start -->
     <router-view />
+    <!-- wwFront:end -->
 </template>
 
 <script>

@@ -3,7 +3,7 @@ import { checkVariableType } from '@/_common/helpers/updateVariable.js';
 import { cloneDeep } from 'lodash';
 import { useVariablesStore } from '@/pinia/variables.js';
 import { storeToRefs } from 'pinia';
-
+ 
 export default {
     /**
      * @PUBLIC_API
@@ -21,10 +21,7 @@ export default {
         const variable = variablesStore.getConfiguration(variableId);
         try {
             if (!variable) {
-                wwLib.logStore.error(`Try to set variable ${variableId} (not found)`, {
-                    type: workflowContext ? 'action' : null,
-                });
-                throw new Error('variable not found');
+                 throw new Error('variable not found');
             }
 
             if (value === undefined && !['delete', 'shift', 'pop'].includes(arrayUpdateType)) {
@@ -37,7 +34,8 @@ export default {
             return value;
         } catch (error) {
             wwLib.wwLog.error(
-                `Unable to update variable ${variable ? `${variable.name} of type ${variable.type}` : ''
+                `Unable to update variable ${
+                    variable ? `${variable.name} of type ${variable.type}` : ''
                 } (${variableId}) : ${error.message} - got : `
             );
             wwLib.wwLog.error(value);
@@ -55,7 +53,7 @@ export default {
         type = 'any',
         readonly = false,
         resettable = false,
-        onUpdate = () => { },
+        onUpdate = () => {},
         labelOnly = null,
         preserveReference = false,
         isActive = ref(true),
@@ -72,8 +70,9 @@ export default {
         const sectionId = inject('sectionId');
         const variablesStore = useVariablesStore();
 
-        watch(isActive,
-            (value) => {
+        watch(
+            isActive,
+            value => {
                 if (value && !variableId.value) {
                     if (!isInsideRepeat.value) {
                         if (isInsideLibraryComponent.value) {
@@ -126,8 +125,8 @@ export default {
             isInsideRepeat.value
                 ? unref(defaultValue)
                 : isInsideLibraryComponent.value
-                    ? libraryContext?.component?.variables[variableId.value]
-                    : variablesStore.values[variableId.value]
+                ? libraryContext?.component?.variables[variableId.value]
+                : variablesStore.values[variableId.value]
         );
         const currentValue = computed(() => {
             if (hasPropValue.value) {
@@ -259,10 +258,7 @@ function registerLibraryComponentVariable({
     return id;
 }
 
-function unregisterLibraryComponentVariable({
-    id,
-    libraryContext
-}) {
+function unregisterLibraryComponentVariable({ id, libraryContext }) {
     delete libraryContext.component.componentVariablesConfiguration[id];
     delete libraryContext.component.variables[id];
 }

@@ -41,35 +41,35 @@ export default {
     \================================================================================================*/
     getComponentAvailableStates:
         state =>
-            ({ type, uid }) => {
-                let _state;
-                if (type === 'section') {
-                    _state = (state.sections[uid] && state.sections[uid]._state) || {};
-                } else {
-                    _state = (state.wwObjects[uid] && state.wwObjects[uid]._state) || {};
-                }
-                return (_state.states || []).map(state => state.id);
-            },
+        ({ type, uid }) => {
+            let _state;
+            if (type === 'section') {
+                _state = (state.sections[uid] && state.sections[uid]._state) || {};
+            } else {
+                _state = (state.wwObjects[uid] && state.wwObjects[uid]._state) || {};
+            }
+            return (_state.states || []).map(state => state.id);
+        },
     getComponentRawStates:
         state =>
-            ({ type, uid }) => {
-                let _state;
-                if (type === 'section') {
-                    _state = (state.sections[uid] && state.sections[uid]._state) || {};
-                } else {
-                    _state = (state.wwObjects[uid] && state.wwObjects[uid]._state) || {};
-                }
-                return _state.states || [];
-            },
+        ({ type, uid }) => {
+            let _state;
+            if (type === 'section') {
+                _state = (state.sections[uid] && state.sections[uid]._state) || {};
+            } else {
+                _state = (state.wwObjects[uid] && state.wwObjects[uid]._state) || {};
+            }
+            return _state.states || [];
+        },
     getWwObjectStyle: state => id => {
         const { _state = {} } = state.wwObjects[id] || {};
         return _state.style || {};
     },
     getFullWwObject:
         state =>
-            (uid, asTemplate = false) => {
-                return utils.parseFullObject(state, { uid, isWwObject: true }, asTemplate);
-            },
+        (uid, asTemplate = false) => {
+            return utils.parseFullObject(state, { uid, isWwObject: true }, asTemplate);
+        },
     getWwObjects(state) {
         return state.wwObjects;
     },

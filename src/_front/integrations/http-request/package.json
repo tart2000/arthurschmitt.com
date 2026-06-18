@@ -1,0 +1,6 @@
+{
+    "name": "@weweb/front-integration-http-request",
+    "weweb": {
+        "native": true
+    }
+}

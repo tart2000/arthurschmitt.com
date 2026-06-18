@@ -1,11 +1,12 @@
-import { createApp, createSSRApp } from 'vue';
+import { createApp } from 'vue';
 import axios from 'axios';
 import { VueCookieNext } from 'vue-cookie-next';
 import { isEqual, isEmpty, cloneDeep, get, set, merge } from 'lodash';
 
  
 /* wwFront:start */
-import { createHead } from '@vueuse/head';
+import { createHead } from '@unhead/vue/client';
+import wwServerClient from '@/_common/helpers/code/serverClient.js';
 /* wwFront:end */
 
 import App from '@/_front/App.vue';
@@ -14,7 +15,6 @@ import router from '@/_front/router.js';
 let store;
 let pinia;
 /* wwFront:start */
-// Set theme class before first global context computation to avoid flickering and wrong computed colors
 if (window.localStorage?.getItem('ww-app-theme') === 'dark')
     document.documentElement.classList.add('ww-app-theme-dark');
 else if (window.localStorage?.getItem('ww-app-theme') === 'light')
@@ -68,7 +68,15 @@ window._ = {
 };
 window.axios = axios.create({});
 
- 
+// Register hooks
+import { useHooksStore } from '@/pinia/hooks.js';
+const hooksStore = useHooksStore(pinia);
+hooksStore.registerIntegrationHooks();
+
+ /* wwFront:start */
+window.wwServerClient = wwServerClient;
+/* wwFront:end */
+
 const app = createApp(App);
 
 const init = async function () {

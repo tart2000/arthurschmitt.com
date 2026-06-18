@@ -10,6 +10,7 @@ import wwLog from './wwLog.js';
 import wwObjectHelper from './wwObjectHelper.js';
 import wwPageHelper from './wwPageHelper.js';
 import wwPluginHelper from './wwPluginHelper.js';
+import wwTableView from './wwTableView.js';
 import wwUtils from './wwUtils.js';
 import wwVariable from './wwVariable.js';
 import wwWebsiteData from './wwWebsiteData.js';
@@ -19,6 +20,7 @@ import globalVariables from './globalVariables.js';
 import { createScrollStore } from '@/_common/store/scrollStore.js';
 import { createKeyboardEventStore } from '@/_common/store/keyboardStore.js';
 import { createLogStore } from '@/_common/store/logStore.js';
+import { createPwaStore } from '@/_common/store/pwaStore.ts';
 
 export default {
     wwApp,
@@ -34,6 +36,7 @@ export default {
     wwObjectHelper,
     wwPageHelper,
     wwPluginHelper,
+    wwTableView,
     wwUtils,
     wwVariable,
     wwWebsiteData,
@@ -41,5 +44,6 @@ export default {
     globalVariables,
     scrollStore: createScrollStore(),
     keyboardEventStore: createKeyboardEventStore(),
-    logStore: createLogStore(),
+    pwaStore: createPwaStore(),
+    logStore: createLogStore(), // TODO: to be removed
 };

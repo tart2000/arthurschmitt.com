@@ -112,9 +112,7 @@ export const useVariablesStore = defineStore('variables', () => {
                         const currentPath = router.currentRoute._value.path;
                         const currentQuery = router.currentRoute._value.query;
 
-                        const valueToSet = value !== configuration.defaultValue ? value : undefined;
-
-                        if (currentQuery[configuration.queryName || configuration.name] !== valueToSet) {
+                        if (currentQuery[configuration.queryName || configuration.name] !== value) {
                             const query = { ...currentQuery };
                             // TODO: reread this comments with new store and see if we can do better
                             // Apply all query variables because replace is async but we can't await here and so it produce a race condition issue on mulltiple query update
@@ -123,7 +121,7 @@ export const useVariablesStore = defineStore('variables', () => {
                                     query[this.website[key].queryName || this.website[key].name] =
                                         this.values[key] === '' ? undefined : this.values[key];
                             }
-                            query[configuration.queryName || configuration.name] = valueToSet;
+                            query[configuration.queryName || configuration.name] = value;
                             router.replace({
                                 path: currentPath,
                                 query,

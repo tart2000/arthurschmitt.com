@@ -81,11 +81,23 @@ export default {
     setWorkflowActionResult({ commit }, data) {
         commit('setWorkflowActionResult', data);
     },
+    setWorkflowDebugMetadata({ commit }, data) {
+        commit('setWorkflowDebugMetadata', data);
+    },
     setWorkflowError({ commit }, data) {
         commit('setWorkflowError', data);
     },
     setWorkflowActionLoop({ commit }, data) {
         commit('setWorkflowActionLoop', data);
+    },
+    setWorkflowActionStream({ commit }, data) {
+        commit('setWorkflowActionStream', data);
+    },
+    setWorkflowVariable({ commit }, data) {
+        commit('setWorkflowVariable', data);
+    },
+    deleteWorkflowVariable({ commit }, data) {
+        commit('deleteWorkflowVariable', data);
     },
     initGlobalWorkflows({ dispatch }, workflows) {
         for (const worfklowData of workflows) {
@@ -107,5 +119,8 @@ export default {
     },
     resetWorkflowsResult({ commit }) {
         commit('resetWorkflowsResult');
+    },
+    resetWorkflowResult({ commit }, { workflowId }) {
+        commit('resetWorkflowResult', { workflowId });
     },
  };

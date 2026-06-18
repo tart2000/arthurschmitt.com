@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getKeyValue } from 'lodash';
+import { convertPathToRouterFormat } from '@/_common/helpers/urlParametersParsing';
 
 export default {
     /**
@@ -54,10 +55,7 @@ function generateTmpRouter() {
             } else {
                 routes.push({
                     name: `page_${page.id}_${lang}`,
-                    path:
-                        (lang === 'default' ? '' : '/' + lang) +
-                        '/' +
-                        page.paths[lang].replace(/{{([\w]+)\|([^/]+)?}}/g, ':$1'),
+                    path: (lang === 'default' ? '' : '/' + lang) + '/' + convertPathToRouterFormat(page.paths[lang]),
                 });
             }
         });
