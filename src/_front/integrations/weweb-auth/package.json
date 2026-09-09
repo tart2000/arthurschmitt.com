@@ -1,0 +1,6 @@
+{
+    "name": "@weweb/front-integration-weweb-auth",
+    "weweb": {
+        "native": true
+    }
+}
