@@ -1,0 +1,14 @@
+{
+  "name": "@weweb-internal/ext-element-fd8c482f-532c-4aeb-a7ae-6904a6b62a1b",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-input-file-drop"
+  },
+  "version": "3.3.0",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@weweb-internal/ext-plugin-2bd1c688-31c5-443e-ae25-59aa5b6431fb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/plugin-rest-api"
+  },
+  "version": "3.2.0",
+  "license": "MIT",
+  "dependencies": {
+    "qs": "6.16.0"
+  },
+  "private": true,
+  "exports": {
+    ".": "./src/wwPlugin.js",
+    "./config": "./ww-config.js"
+  }
+}
