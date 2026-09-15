@@ -1,0 +1,14 @@
+{
+  "name": "@weweb-internal/ext-element-53401515-b694-4c79-a88d-abeecb1de562",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-expand"
+  },
+  "version": "3.1.0",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}

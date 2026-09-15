@@ -1,0 +1,12 @@
+{
+  "name": "@weweb-internal/ext-element-0d3e75d1-9e77-44cb-a272-8b0825fbc5da",
+  "version": "3.1.1",
+  "dependencies": {
+    "@vueform/multiselect": "2.6.2"
+  },
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}
