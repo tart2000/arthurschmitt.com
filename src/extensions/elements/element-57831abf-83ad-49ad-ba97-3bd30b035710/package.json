@@ -1,0 +1,20 @@
+{
+  "name": "@weweb-internal/ext-element-57831abf-83ad-49ad-ba97-3bd30b035710",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-rich-text-temp"
+  },
+  "version": "3.1.0",
+  "dependencies": {
+    "animejs": "^3.2.1",
+    "marked": "^14.1.2",
+    "medium-zoom": "^1.0.6",
+    "prismjs": "^1.23.0"
+  },
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "name": "pixicons-icon",
+    "description": "Displays pixel icons from the Pixicons library using the official Pixicons kit.",
+    "keywords": ["icon", "pixicons", "pixel", "svg", "graphic", "link"],
+    "features": [
+      "Renders Pixicons icons automatically using the official pixicons.js kit",
+      "Supports multiple styles (pixel, rounded, blob, liquid, liquid-blob, retro, stitch, knit, dots) and variants (regular, fill)",
+      "Supports states (hover, active) for variant, style, icon, color and size",
+      "Customizable size and color inheriting surrounding text color by default",
+      "Accessible with configurable label or aria-hidden",
+      "Native linkable support (options.linkable: true)"
+    ],
+    "inherit": []
+  },
+  "properties": [
+    {
+      "name": "icon",
+      "description": "The name of the Pixicons icon (e.g. 'heart', 'arrow-right'). Supports states.",
+      "type": "string",
+      "defaultValue": "heart"
+    },
+    {
+      "name": "variant",
+      "description": "The icon variant ('regular' or 'fill'). Supports states.",
+      "type": "string",
+      "defaultValue": "regular"
+    },
+    {
+      "name": "style",
+      "description": "The visual pixel style (pixel, rounded, blob, liquid, liquid-blob, retro, stitch, knit, dots). Supports states.",
+      "type": "string",
+      "defaultValue": "pixel"
+    },
+    {
+      "name": "accessibleLabel",
+      "description": "Accessible label for screen readers. When set, assigns role='img' and aria-label; when empty, sets aria-hidden='true'.",
+      "type": "string",
+      "defaultValue": ""
+    },
+    {
+      "name": "size",
+      "description": "The font-size applied to the icon (e.g. '24px', '1.5rem'). Supports states and breakpoints.",
+      "type": "string",
+      "defaultValue": "24px"
+    },
+    {
+      "name": "color",
+      "description": "The color applied to the icon. If empty, inherits the surrounding text color. Supports states and breakpoints.",
+      "type": "string",
+      "defaultValue": ""
+    }
+  ],
+  "states": [],
+  "events": [],
+  "localContext": [],
+  "actions": [],
+  "slots": [],
+  "variables": [],
+  "specifications": [
+    "Loads https://www.pixicons.io/kit/pixicons.js once into the document head on mount.",
+    "Renders an inline-flex root <span> (or <a> when a link is set) containing an <i> element turned into SVG by Pixicons kit.",
+    "The <i> classes are: 'px', 'px-' + icon name (lowercased, trimmed), 'px-' + style, 'px-' + variant.",
+    "The <i> element is kept across state changes (never re-keyed): only its classes change. After every class change (and on mount), the component toggles a helper class on the <i> parent so the kit's MutationObserver rescans and re-renders the icon, including inside the WeWeb editor and preview where the kit ignores nodes created from another window.",
+    "Supports native link configuration (options.linkable: true). When a link is set, renders as a link tag with proper SPA or external navigation.",
+    "Supports states: true on variant, style, icon, size and color.",
+    "Size is applied as font-size on the root; color is applied as color on the root."
+  ],
+  "examples": [
+    {
+      "description": "Standard heart icon in regular pixel style",
+      "example": "{\"icon\": \"heart\", \"variant\": \"regular\", \"style\": \"pixel\", \"size\": \"24px\"}"
+    }
+  ],
+  "dependencies": []
+}

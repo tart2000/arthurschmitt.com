@@ -1,0 +1,14 @@
+{
+  "name": "@weweb-internal/ext-element-69d0b3ef-b265-494c-8cd1-874da4aa1834",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-form-container"
+  },
+  "version": "3.1.0",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}

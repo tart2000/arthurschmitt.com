@@ -1,0 +1,13 @@
+{
+  "name": "@weweb-internal/ext-element-985570fc-b3c0-4566-8004-82ab3b30a11d",
+  "version": "0.0.1",
+  "dependencies": {
+    "@vuepic/vue-datepicker": "3.6.8",
+    "date-fns": "4.1.0"
+  },
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}

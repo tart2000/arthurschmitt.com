@@ -1,0 +1,17 @@
+{
+  "name": "@weweb-internal/ext-element-9ccf84b0-e542-4423-869f-b4828301ec49",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-slider"
+  },
+  "version": "3.1.1",
+  "license": "MIT",
+  "dependencies": {
+    "swiper": "12.1.4"
+  },
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}
