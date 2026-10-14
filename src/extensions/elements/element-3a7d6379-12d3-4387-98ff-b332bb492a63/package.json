@@ -1,0 +1,14 @@
+{
+  "name": "@weweb-internal/ext-element-3a7d6379-12d3-4387-98ff-b332bb492a63",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weweb-assets/ww-image"
+  },
+  "version": "3.3.0",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": "./src/wwElement.vue",
+    "./config": "./ww-config.js"
+  }
+}
